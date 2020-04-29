@@ -11,6 +11,10 @@ import axios from 'axios'
 import qs from 'qs'
 // 配置请求根路径
 axios.defaults.baseURL = 'http://test.admin.com'
+axios.interceptors.request.use(config => {
+  config.headers.Authorization = window.sessionStorage.getItem('token')
+  return config
+})
 Vue.prototype.$http = axios
 Vue.prototype.$qs = qs
 Vue.config.productionTip = false
