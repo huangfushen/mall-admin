@@ -45,7 +45,12 @@
               @click="showEditDialog(scope.row.id)"
             ></el-button>
             <!-- 删除按钮 -->
-            <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
+            <el-button
+              type="danger"
+              icon="el-icon-delete"
+              size="mini"
+              @click="delUser(scope.row.id)"
+            ></el-button>
             <!-- 分配角色按钮 -->
             <el-tooltip effect="dark" content="分配权限" placement="top" :enterable="false">
               <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
@@ -209,19 +214,25 @@ export default {
       const updateInfo = { mg_state: userInfo.mg_state, id: userInfo.id }
       const { data: res } = await this.$http.post('user/updateUser', this.$qs.stringify(updateInfo))
       if (res.rcode !== 2003) {
-        // 状态取反反正更新失败前端data值改变
-        userInfo.mg_state = !userInfo.mg_state
-        return this.$message.error('修改用户状态失败,请重试!')
+        // 状态取反,更新失败前端data值改变
+        this.$message.error('修改用户状态失败,请重试!')
+        this.userList[userInfo.id].mg_state = !this.userList[userInfo.id].mg_state
+      } else {
+        this.$message.success('修改用户状态成功!')
       }
-      this.$message.success('修改用户状态成功!')
     },
     // 获取用户列表
     async getUserList () {
       const { data: res } = await this.$http.post('user/getUserList', this.$qs.stringify(this.queryInfo))
-      // console.log(res)
-      if (res.rcode !== 2001) return this.$message.error('获取用户列表失败,请重试')
+      console.log(res)
+      if (res.rcode === 5007) {
+        this.$message.error('token已过期，请重新登录')
+        window.sessionStorage.clear()
+        this.$router.push('/login')
+      }
+      if (res.rcode !== 2001) return this.$message.error('用户信息获取失败，请重试!')
       this.userList = res.data.userList
-      console.log(this.userList)
+      // console.log(this.userList)
       this.total = res.data.total
     },
 
@@ -267,6 +278,24 @@ export default {
           this.$message.error('用户信息修改失败,请重试!')
         }
       })
+    },
+    // 删除用户
+    async delUser (id) {
+      const promiseRes = await this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => err)
+      // console.log(promiseRes)
+      if (promiseRes !== 'confirm') return this.$message.info('已取消删除')
+      const { data: res } = await this.$http.get('user/deleteUser', {
+        params: {
+          id: id
+        }
+      })
+      if (res.rcode !== 2003) return this.$message.error('删除用户失败,请刷新重试!')
+      this.$message.success('删除用户操作成功')
+      this.getUserList()
     }
   },
   components: {
