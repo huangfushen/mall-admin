@@ -64,9 +64,10 @@ export default {
       iconsObj: {
         1: 'iconfont icon-user',
         2: 'iconfont icon-users',
-        3: 'iconfont icon-baobiao',
+        3: 'iconfont icon-lock',
         4: 'iconfont icon-check-circle',
-        5: 'iconfont icon-lock-fill'
+        5: 'iconfont icon-lock-fill',
+        6: 'iconfont icon-user'
       },
       isCollapse: false,
       activePath: ''

@@ -165,7 +165,7 @@ export default {
           { min: 11, max: 11, message: '手机号码格式不正确', trigger: 'blur' }
         ]
       },
-      // 添加表单的验证规则
+      // 编辑表单的验证规则
       editFormRules: {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -216,7 +216,11 @@ export default {
       if (res.rcode !== 2003) {
         // 状态取反,更新失败前端data值改变
         this.$message.error('修改用户状态失败,请重试!')
-        this.userList[userInfo.id].mg_state = !this.userList[userInfo.id].mg_state
+        if (userInfo.mg_state === 'true') {
+          userInfo.mg_state = 'false'
+        } else {
+          userInfo.mg_state = 'true'
+        }
       } else {
         this.$message.success('修改用户状态成功!')
       }
@@ -224,7 +228,6 @@ export default {
     // 获取用户列表
     async getUserList () {
       const { data: res } = await this.$http.post('user/getUserList', this.$qs.stringify(this.queryInfo))
-      console.log(res)
       if (res.rcode === 5007) {
         this.$message.error('token已过期，请重新登录')
         window.sessionStorage.clear()
@@ -262,7 +265,6 @@ export default {
       })
       if (res.rcode !== 2001) return this.$message.error('获取用户信息失败,请重试!')
       this.editForm = res.data
-      console.log(this.editForm)
       this.editDialogVisible = true
     },
     editUser () {
