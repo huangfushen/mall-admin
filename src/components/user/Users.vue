@@ -52,8 +52,13 @@
               @click="delUser(scope.row.id)"
             ></el-button>
             <!-- 分配角色按钮 -->
-            <el-tooltip effect="dark" content="分配权限" placement="top" :enterable="false">
-              <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+            <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
+              <el-button
+                @click="showSetRoleDialog(scope.row)"
+                type="warning"
+                icon="el-icon-setting"
+                size="mini"
+              ></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -116,6 +121,33 @@
         <el-button type="primary" @click="editUser()">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 分配角色对话框 -->
+    <el-dialog
+      title="分配角色"
+      :visible.sync="setRoleDialogVisible"
+      width="50%"
+      @close="setRoleDialogClosed()"
+    >
+      <div>
+        <p>当前用户:{{userInfo.username}}</p>
+        <p>当前角色:{{userInfo.role_name}}</p>
+        <p>
+          分配新角色:
+          <el-select v-model="selectedRole" placeholder="请选择">
+            <el-option
+              v-for="item in roleList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.roleName"
+            ></el-option>
+          </el-select>
+        </p>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="setRoleDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="setUserRole()">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -137,7 +169,11 @@ export default {
         email: '',
         telphone: ''
       },
+      // 分配角色当前角色
+      userInfo: {},
       userList: [],
+      roleList: [],
+      selectedRole: '',
       total: 0,
       queryInfo: {
         query: '',
@@ -146,6 +182,7 @@ export default {
       },
       addDialogVisible: false,
       editDialogVisible: false,
+      setRoleDialogVisible: false,
       // 添加表单的验证规则
       addFormRules: {
         username: [
@@ -191,6 +228,11 @@ export default {
     showAddDialog () {
       this.addDialogVisible = true
     },
+    showSetRoleDialog (user) {
+      this.userInfo = user
+      this.getRoleList()
+      this.setRoleDialogVisible = true
+    },
     // 重置添加表单
     addDialogClosed () {
       this.$refs.addFormRef.resetFields()
@@ -208,6 +250,22 @@ export default {
     // 重置修改表单
     editDialogClosed () {
       this.$refs.editFormRef.resetFields()
+    },
+    setRoleDialogClosed () {
+      this.selectedRole = ''
+    },
+    // 分配角色
+    async setUserRole () {
+      const updateInfo = { role_name: this.selectedRole, id: this.userInfo.id }
+      const { data: res } = await this.$http.post('user/updateUser', this.$qs.stringify(updateInfo))
+      if (res.rcode !== 2003) {
+        // 状态取反,更新失败前端data值改变
+        this.$message.error('角色分配失败,请重试!')
+      } else {
+        this.$message.success('角色分配成功!')
+        this.setRoleDialogVisible = false
+        this.getUserList()
+      }
     },
     // 监听switch状态改变
     async userStateChanged (userInfo) {
@@ -235,10 +293,19 @@ export default {
       }
       if (res.rcode !== 2001) return this.$message.error('用户信息获取失败，请重试!')
       this.userList = res.data.userList
-      // console.log(this.userList)
       this.total = res.data.total
     },
-
+    // 获取角色列表
+    async getRoleList () {
+      const { data: res } = await this.$http.get('role/getRoleList')
+      if (res.rcode === 5007) {
+        this.$message.error('token已过期，请重新登录')
+        window.sessionStorage.clear()
+        this.$router.push('/login')
+      }
+      if (res.rcode !== 2001) return this.$message.error('权限信息获取失败，请重试!')
+      this.roleList = res.data.roleList
+    },
     // 添加用户操作
     addUser () {
       this.$refs.addFormRef.validate(async valid => {

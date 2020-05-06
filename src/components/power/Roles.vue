@@ -237,7 +237,7 @@ export default {
     },
     // 展示修改用户对话框
     async showEditDialog (id) {
-      const { data: res } = await this.$http.get('role/getRoleById', {
+      const { data: res } = await this.$http.get('role/getRoleRightById', {
         params: {
           id: id
         }
@@ -322,7 +322,7 @@ export default {
     },
     // 获取角色列表
     async getRoleList () {
-      const { data: res } = await this.$http.get('role/getRoleList')
+      const { data: res } = await this.$http.get('role/getRoleRightList')
       if (res.rcode === 5007) {
         this.$message.error('token已过期，请重新登录')
         window.sessionStorage.clear()
