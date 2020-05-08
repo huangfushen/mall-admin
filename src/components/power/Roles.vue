@@ -141,15 +141,6 @@
         :default-checked-keys="defKeys"
         ref="treeRef"
       ></el-tree>
-      <!-- 内容主题区
-      <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="80px">
-        <el-form-item label="角色名" prop="roleName">
-          <el-input v-model="editForm.roleName"></el-input>
-        </el-form-item>
-        <el-form-item label="角色简介" prop="roleDesc">
-          <el-input v-model="editForm.roleDesc"></el-input>
-        </el-form-item>
-      </el-form>-->
       <div slot="footer" class="dialog-footer">
         <el-button @click="setRightDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="setRight()">确 定</el-button>
@@ -219,25 +210,31 @@ export default {
     },
     // 展示角色权限分配对话框
     async showSetRightDialog (role) {
-      this.roleId = role.id
-      const { data: res } = await this.$http.get('role/getRightList')
+      const { data: res } = await this.$http.get('Role/getRightList')
       if (res.rcode !== 2001) return this.$message.error('获取权限信息失败,请重试!')
       this.rigthList = res.data.rightList
-      this.getLeaKeys(role, this.defKeys)
+      const { data: res1 } = await this.$http.get('Role/getThirdRightId', {
+        params: {
+          id: role.id
+        }
+      })
+      if (res1.rcode !== 2001) return this.$message.error('获取三级权限id失败,请重试!')
+      this.defKeys = res1.data.key
       this.setRightDialogVisible = true
     },
-    // 递归获取三级权限id保存到defkeys中
-    getLeaKeys (node, arr) {
-      if (!node.childrens) {
-        return arr.push(parseInt(node.id))
-      }
-      node.childrens.forEach(item => {
-        this.getLeaKeys(item, arr)
-      })
-    },
+    // // 递归获取三级权限id保存到defkeys中
+    // getLeaKeys (node, arr) {
+    //   // console.log(node)
+    //   if (!node.childrens) {
+    //     return arr.push(parseInt(node.id))
+    //   }
+    //   node.childrens.forEach(item => {
+    //     this.getLeaKeys(item, arr)
+    //   })
+    // },
     // 展示修改用户对话框
     async showEditDialog (id) {
-      const { data: res } = await this.$http.get('role/getRoleRightById', {
+      const { data: res } = await this.$http.get('Role/getRoleRightById', {
         params: {
           id: id
         }
@@ -265,7 +262,7 @@ export default {
         ...this.$refs.treeRef.getHalfCheckedKeys()
       ]
       const idstr = keys.join(',')
-      const { data: res } = await this.$http.post('role/setRoleRight', this.$qs.stringify({ rid: this.roleId, pid: idstr }))
+      const { data: res } = await this.$http.post('Role/setRoleRight', this.$qs.stringify({ rid: this.roleId, pid: idstr }))
       if (res.rcode === 2003) {
         this.setRightDialogVisible = false
         this.$message.success('权限修改成功!')
@@ -278,7 +275,7 @@ export default {
     addRole () {
       this.$refs.addFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.post('role/addRole', this.$qs.stringify(this.addForm))
+        const { data: res } = await this.$http.post('Role/addRole', this.$qs.stringify(this.addForm))
         if (res.rcode === 2002) {
           this.addDialogVisible = false
           this.getRoleList()
@@ -322,7 +319,7 @@ export default {
     },
     // 获取角色列表
     async getRoleList () {
-      const { data: res } = await this.$http.get('role/getRoleRightList')
+      const { data: res } = await this.$http.get('Role/getRoleRightList')
       if (res.rcode === 5007) {
         this.$message.error('token已过期，请重新登录')
         window.sessionStorage.clear()
@@ -341,7 +338,7 @@ export default {
       if (confirmRes !== 'confirm') {
         return this.$message.info('取消本次删除！')
       }
-      const { data: res } = await this.$http.get('role/delRoleRight', {
+      const { data: res } = await this.$http.get('Role/delRoleRight', {
         params: {
           rid: role.id,
           pid: rightId

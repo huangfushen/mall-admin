@@ -67,7 +67,8 @@ export default {
         3: 'iconfont icon-lock',
         4: 'iconfont icon-check-circle',
         5: 'iconfont icon-lock-fill',
-        6: 'iconfont icon-user'
+        6: 'iconfont icon-user',
+        43: 'el-icon-goods'
       },
       isCollapse: false,
       activePath: ''
@@ -79,7 +80,7 @@ export default {
   },
   methods: {
     async loginout () {
-      const { data: res } = await this.$http.get('user/loginout')
+      const { data: res } = await this.$http.get('User/loginout')
       if (res.rcode === 5007 || res.rcode === 2003) {
         this.$message.success('退出登录成功')
         window.sessionStorage.clear()
@@ -90,7 +91,7 @@ export default {
       }
     },
     async getMenuList () {
-      const { data: res } = await this.$http.get('menu/getMenulist')
+      const { data: res } = await this.$http.get('Menu/getMenulist')
       if (res.rcode === 2001) {
         this.menuList = res.data.menuList
       } else if (res.rcode === 5007 || res.rcode === 5001) {

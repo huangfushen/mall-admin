@@ -199,7 +199,7 @@ export default {
         ],
         telphone: [
           { required: true, message: '请输入手机号码', trigger: 'blur' },
-          { min: 11, max: 11, message: '手机号码格式不正确', trigger: 'blur' }
+          { type: 'number', min: 11, max: 11, message: '手机号码格式不正确', trigger: 'blur' }
         ]
       },
       // 编辑表单的验证规则
@@ -257,7 +257,7 @@ export default {
     // 分配角色
     async setUserRole () {
       const updateInfo = { role_name: this.selectedRole, id: this.userInfo.id }
-      const { data: res } = await this.$http.post('user/updateUser', this.$qs.stringify(updateInfo))
+      const { data: res } = await this.$http.post('User/updateUser', this.$qs.stringify(updateInfo))
       if (res.rcode !== 2003) {
         // 状态取反,更新失败前端data值改变
         this.$message.error('角色分配失败,请重试!')
@@ -270,7 +270,7 @@ export default {
     // 监听switch状态改变
     async userStateChanged (userInfo) {
       const updateInfo = { mg_state: userInfo.mg_state, id: userInfo.id }
-      const { data: res } = await this.$http.post('user/updateUser', this.$qs.stringify(updateInfo))
+      const { data: res } = await this.$http.post('User/updateUser', this.$qs.stringify(updateInfo))
       if (res.rcode !== 2003) {
         // 状态取反,更新失败前端data值改变
         this.$message.error('修改用户状态失败,请重试!')
@@ -285,7 +285,7 @@ export default {
     },
     // 获取用户列表
     async getUserList () {
-      const { data: res } = await this.$http.post('user/getUserList', this.$qs.stringify(this.queryInfo))
+      const { data: res } = await this.$http.post('User/getUserList', this.$qs.stringify(this.queryInfo))
       if (res.rcode === 5007) {
         this.$message.error('token已过期，请重新登录')
         window.sessionStorage.clear()
@@ -297,7 +297,7 @@ export default {
     },
     // 获取角色列表
     async getRoleList () {
-      const { data: res } = await this.$http.get('role/getRoleList')
+      const { data: res } = await this.$http.get('Role/getRoleList')
       if (res.rcode === 5007) {
         this.$message.error('token已过期，请重新登录')
         window.sessionStorage.clear()
@@ -325,7 +325,7 @@ export default {
     },
     // 展示修改用户对话框
     async showEditDialog (id) {
-      const { data: res } = await this.$http.get('user/getUserById', {
+      const { data: res } = await this.$http.get('User/getUserById', {
         params: {
           id: id
         }
@@ -357,7 +357,7 @@ export default {
       }).catch(err => err)
       // console.log(promiseRes)
       if (promiseRes !== 'confirm') return this.$message.info('已取消删除')
-      const { data: res } = await this.$http.get('user/deleteUser', {
+      const { data: res } = await this.$http.get('User/deleteUser', {
         params: {
           id: id
         }
