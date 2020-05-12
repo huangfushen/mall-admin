@@ -9,6 +9,7 @@ import './assets/css/global.css'
 import './assets/font/iconfont.css'
 import axios from 'axios'
 import qs from 'qs'
+import tableTree from 'vue-table-with-tree-grid'
 // 配置请求根路径
 axios.defaults.baseURL = 'http://test.admin.com'
 axios.interceptors.request.use(config => {
@@ -18,7 +19,7 @@ axios.interceptors.request.use(config => {
 Vue.prototype.$http = axios
 Vue.prototype.$qs = qs
 Vue.config.productionTip = false
-
+Vue.component('tree-table', tableTree)
 new Vue({
   router,
   store,

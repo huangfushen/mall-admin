@@ -216,7 +216,7 @@ export default {
       addFormRules: {
         authName: [
           { required: true, message: '请输入权限名称', trigger: 'blur' },
-          { min: 3, max: 10, message: '用户名长度为 3 到 10 个字符', trigger: 'blur' }
+          { min: 3, max: 10, message: '权限名长度为 3 到 10 个字符', trigger: 'blur' }
         ],
         path: [
           { required: true, message: '请输入路径', trigger: 'blur' }
